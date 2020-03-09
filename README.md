@@ -6,7 +6,7 @@ Postman можно найти в папке api.
 
 ### Запуск сервера
 
-`docker-compose up --build`
+`sudo docker-compose up --build`
 
 ### Api
 
