@@ -20,10 +20,10 @@
 `curl -i -X GET "localhost:7171/get-product-list"`:
 
 * Получить информацию о товаре по его `name`:
-`curl -i -X GET "localhost:7171/get-product-info?name=pepper"`
+`curl -i -X GET "localhost:7171/get-product-info?name=apple"`
 
 #### Delete запрос
 
-Удалить продукт по его `name`:
+* Удалить продукт по его `name`:
 `curl -i -X DELETE "localhost:7171/delete-product?name=apple"`
 
