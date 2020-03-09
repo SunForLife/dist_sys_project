@@ -15,5 +15,5 @@ func main() {
 
 	log.Printf("Started on port: %d\n", *port)
 	http.HandleFunc("/", onlineShopHandler.handler) // each request calls handler
-	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(*port), nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+strconv.Itoa(*port), nil))
 }
