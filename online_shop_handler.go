@@ -127,6 +127,7 @@ func (osh *OnlineShopHandler) handler(w http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		if strings.Contains(r.RequestURI, "delete-product") {
 			log.Println("Got delete-product request")
+
 			if len(r.URL.Query()["name"]) == 0 {
 				BadRequest(w, "name param not found")
 				return
@@ -150,10 +151,6 @@ func (osh *OnlineShopHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
-
-// func ParseParamByName(w http.ResponseWriter, urlQuery url.Values, paramName string) string {
-// 	return ""
-// }
 
 func BadRequest(w http.ResponseWriter, err string) {
 	w.WriteHeader(http.StatusBadRequest)

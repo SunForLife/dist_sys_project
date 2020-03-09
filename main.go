@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	port := flag.Int("port", 8000, "port")
+	port := flag.Int("port", 7171, "port")
 	flag.Parse()
 
 	onlineShopHandler := OnlineShopHandler{Products: make([]Product, 0)}
