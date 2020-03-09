@@ -1,0 +1,227 @@
+{
+	"info": {
+		"_postman_id": "61a207ab-9343-4133-a933-5d210302961c",
+		"name": "api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "adding-tomato",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/create-new-product?name=cucumber&code=2000&category=vegetables",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"create-new-product"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "cucumber"
+						},
+						{
+							"key": "code",
+							"value": "2000"
+						},
+						{
+							"key": "category",
+							"value": "vegetables"
+						}
+					]
+				},
+				"description": "Adding tomato"
+			},
+			"response": []
+		},
+		{
+			"name": "adding-cucumber",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/create-new-product?name=cucumber&code=2000&category=vegetables",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"create-new-product"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "cucumber"
+						},
+						{
+							"key": "code",
+							"value": "2000"
+						},
+						{
+							"key": "category",
+							"value": "vegetables"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "adding-pepper",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/create-new-product?name=pepper&code=9000&category=vegetables",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"create-new-product"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "pepper"
+						},
+						{
+							"key": "code",
+							"value": "9000"
+						},
+						{
+							"key": "category",
+							"value": "vegetables"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tomato-to-apple",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/change-product-by-name?old-name=tomato&name=apple&code=7&category=fruits",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"change-product-by-name"
+					],
+					"query": [
+						{
+							"key": "old-name",
+							"value": "tomato"
+						},
+						{
+							"key": "name",
+							"value": "apple"
+						},
+						{
+							"key": "code",
+							"value": "7"
+						},
+						{
+							"key": "category",
+							"value": "fruits"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-product-list-1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/get-product-list",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"get-product-list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "apple-info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/get-product-info?name=apple",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"get-product-info"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "apple"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-cucumber",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/delete-product?name=cucumber",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"delete-product"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "cucumber"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-product-list-2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7171/get-product-list",
+					"host": [
+						"localhost"
+					],
+					"port": "7171",
+					"path": [
+						"get-product-list"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
