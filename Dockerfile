@@ -1,5 +1,7 @@
 FROM golang:1.13
 
+ENV DOCKER_HOST=127.0.0.1:7171
+
 WORKDIR /go/src/app
 COPY . .
 
