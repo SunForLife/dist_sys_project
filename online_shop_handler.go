@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Describes Product.
@@ -16,14 +18,17 @@ type Product struct {
 
 // Handler for HTTP requests, that stores all data.
 type OnlineShopHandler struct {
-	Products []Product
+	Db *gorm.DB
 }
 
 // GetProductList handler method of OnlineShopHandler.
 func (osh *OnlineShopHandler) handlerGetProductList(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got get-product-list request")
 
-	json, err := json.Marshal(osh.Products)
+	products := []Product{}
+	osh.Db.Find(&products)
+
+	json, err := json.Marshal(products)
 	if err != nil {
 		ErrorRequest(w, err)
 		return
@@ -42,20 +47,18 @@ func (osh *OnlineShopHandler) handlerGetProductInfo(w http.ResponseWriter, r *ht
 	}
 	name := r.URL.Query()["name"][0]
 
-	for _, product := range osh.Products {
-		if product.Name == name {
-			json, err := json.Marshal(product)
-			if err != nil {
-				ErrorRequest(w, err)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintln(w, string(json))
-			return
-		}
+	var product Product
+	if err := osh.Db.Where("Name = ?", name).First(&product).Error; err != nil {
+		NotFoundRequest(w, fmt.Sprint("Not found product with name:", name))
+		return
 	}
-
-	NotFoundRequest(w, fmt.Sprint("Not found product with name:", name))
+	json, err := json.Marshal(product)
+	if err != nil {
+		ErrorRequest(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintln(w, string(json))
 }
 
 // CreateNewProduct handler method of OnlineShopHandler.
@@ -78,7 +81,7 @@ func (osh *OnlineShopHandler) handlerCreateNewProduct(w http.ResponseWriter, r *
 	}
 	category := r.URL.Query()["category"][0]
 
-	osh.Products = append(osh.Products, Product{Name: name, Code: code, Category: category})
+	osh.Db.Create(&Product{Name: name, Code: code, Category: category})
 }
 
 // ChangeProductByName handler method of OnlineShopHandler.
@@ -106,14 +109,14 @@ func (osh *OnlineShopHandler) handlerChangeProductByName(w http.ResponseWriter, 
 	}
 	category := r.URL.Query()["category"][0]
 
-	for i := range osh.Products {
-		if osh.Products[i].Name == oldName {
-			osh.Products[i] = Product{Name: name, Code: code, Category: category}
-			return
-		}
+	var product Product
+	if err := osh.Db.Where("Name = ?", oldName).First(&product).Error; err != nil {
+		NotFoundRequest(w, fmt.Sprint("Not found product with name:", oldName))
+		return
 	}
 
-	NotFoundRequest(w, fmt.Sprint("Not found product with name:", name))
+	osh.Db.Delete(&product, "Name = ?", oldName)
+	osh.Db.Create(&Product{Name: name, Code: code, Category: category})
 }
 
 // DeleteProduct handler method of OnlineShopHandler.
@@ -124,17 +127,15 @@ func (osh *OnlineShopHandler) handlerDeleteProduct(w http.ResponseWriter, r *htt
 		BadRequest(w, "name param not found")
 		return
 	}
-
 	name := r.URL.Query()["name"][0]
-	for i := range osh.Products {
-		if osh.Products[i].Name == name {
-			osh.Products[i] = osh.Products[len(osh.Products)-1]
-			osh.Products = osh.Products[:len(osh.Products)-1]
-			return
-		}
+
+	var product Product
+	if err := osh.Db.Where("Name = ?", name).First(&product).Error; err != nil {
+		NotFoundRequest(w, fmt.Sprint("Not found product with name:", name))
+		return
 	}
 
-	NotFoundRequest(w, fmt.Sprint("Not found product with name:", name))
+	osh.Db.Delete(&product, "Name = ?", name)
 }
 
 func BadRequest(w http.ResponseWriter, err string) {
