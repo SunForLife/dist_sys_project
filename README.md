@@ -15,7 +15,7 @@ Postman можно найти в папке api.
 #### Post запросы
 
 * Создать новый продукт с указанными `name`, `code` и `category`:
-`curl -i -X POST "localhost:7171/create-new-product?name=tomato&code=1000&category=vegetables"`
+`curl -i -X POST "localhost:7171/new-product?name=tomato&code=1000&category=vegetables"`
 
 * Изменить продукт по его `name`:
 `curl -i -X POST "localhost:7171/change-product-by-name?old-name=tomato&name=apple&code=7&category=fruits"`
@@ -23,10 +23,10 @@ Postman можно найти в папке api.
 #### Get запросы
 
 * Получить список товаров:
-`curl -i -X GET "localhost:7171/get-product-list"`:
+`curl -i -X GET "localhost:7171/product-list"`:
 
 * Получить информацию о товаре по его `name`:
-`curl -i -X GET "localhost:7171/get-product-info?name=apple"`
+`curl -i -X GET "localhost:7171/product-info?name=apple"`
 
 #### Delete запрос
 
