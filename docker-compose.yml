@@ -1,7 +1,15 @@
 version: '3'
 
 services:
-  web:
-    build: .
+  app:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
     ports:
       - "7171:7171"
+  auth:
+    build: 
+      context: ./auth
+      dockerfile: Dockerfile
+    ports:
+      - "9191:9191"
