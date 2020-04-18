@@ -20,5 +20,5 @@ func main() {
 	http.HandleFunc("/sign-in", authHandler.SignIn)
 	http.HandleFunc("/refresh", authHandler.Refresh)
 	http.HandleFunc("/validate", authHandler.Validate)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+strconv.Itoa(*port), nil))
+	log.Fatal(http.ListenAndServe("auth:"+strconv.Itoa(*port), nil))
 }

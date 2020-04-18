@@ -7,14 +7,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-var JWT_SECRET = "OLOLOVERYSTRONGSECRET"
-var ACCESS_TIME_DURATION_MINUTES = 5
-var REFRESH_TIME_DURATION_MINUTES = 20
+var JWT_SECRET = os.Getenv("JWT_SECRET")                                                        // "VERYSTRONGSECRET"
+var ACCESS_TIME_DURATION_MINUTES, _ = strconv.Atoi(os.Getenv("ACCESS_TIME_DURATION_MINUTES"))   // 5
+var REFRESH_TIME_DURATION_MINUTES, _ = strconv.Atoi(os.Getenv("REFRESH_TIME_DURATION_MINUTES")) // 20
 
 // Describes User.
 type User struct {

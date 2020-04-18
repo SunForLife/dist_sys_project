@@ -13,3 +13,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9191:9191"
+    environment:
+      JWT_SECRET: "VERYSTRONGSECRET"
+      ACCESS_TIME_DURATION_MINUTES: 5
+      REFRESH_TIME_DURATION_MINUTES: 20

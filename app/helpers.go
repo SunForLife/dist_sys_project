@@ -8,7 +8,7 @@ import (
 )
 
 func validateAccess(token string) error {
-	req, err := http.NewRequest(http.MethodGet, "http://0.0.0.0:9191/validate", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://auth:9191/validate", nil)
 	if err != nil {
 		return err
 	}
