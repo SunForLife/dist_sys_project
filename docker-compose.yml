@@ -1,12 +1,28 @@
 version: '3'
 
 services:
+  db:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: dany
+      POSTGRES_PASSWORD: 123abc
+
   app:
     build: 
       context: ./app
       dockerfile: Dockerfile
     ports:
       - "7171:7171"
+    depends_on:
+      - "db"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: dany
+      DB_NAME: db
+      DB_PASSWORD: 123abc
+
   auth:
     build: 
       context: ./auth

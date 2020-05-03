@@ -2,12 +2,15 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func middleware(next http.Handler) http.Handler {
@@ -31,9 +34,14 @@ func main() {
 	port := flag.Int("port", 7171, "port")
 	flag.Parse()
 
-	db, err := gorm.Open("sqlite3", "test.db")
+	time.Sleep(5 * time.Second)
+	db, err := gorm.Open("postgres", fmt.Sprintf(
+		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"),
+		os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"),
+	))
 	if err != nil {
-		log.Fatal("Failed to connect database")
+		log.Fatal("Failed to connect database", err)
 	}
 	defer db.Close()
 	db.AutoMigrate(&Product{})
