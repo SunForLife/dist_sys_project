@@ -81,11 +81,11 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["refresh"]) == 0 {
+	refresh := r.Header.Get("refresh")
+	if refresh == "" {
 		badRequest(w, "refresh param not found.")
 		return
 	}
-	refresh := r.URL.Query()["refresh"][0]
 
 	email, ok := validateToken(w, refresh, "refresh")
 	if !ok {
@@ -98,11 +98,8 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 func (ah *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
 	access := r.Header.Get("access")
 	if access == "" {
-		if len(r.URL.Query()["access"]) == 0 {
-			badRequest(w, "access param not found")
-			return
-		}
-		access = r.URL.Query()["access"][0]
+		badRequest(w, "access param not found")
+		return
 	}
 
 	_, ok := validateToken(w, access, "access")

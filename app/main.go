@@ -12,11 +12,11 @@ import (
 
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if len(r.URL.Query()["access"]) == 0 {
-			badRequest(w, "access param not found2")
+		access := r.Header.Get("access")
+		if access == "" {
+			badRequest(w, "access param not found in middleware")
 			return
 		}
-		access := r.URL.Query()["access"][0]
 
 		if err := validateAccess(access); err != nil {
 			errorRequest(w, err)
