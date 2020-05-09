@@ -14,9 +14,17 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var JWT_SECRET = os.Getenv("JWT_SECRET")                                                        // "VERYSTRONGSECRET"
-var ACCESS_TIME_DURATION_MINUTES, _ = strconv.Atoi(os.Getenv("ACCESS_TIME_DURATION_MINUTES"))   // 5
-var REFRESH_TIME_DURATION_MINUTES, _ = strconv.Atoi(os.Getenv("REFRESH_TIME_DURATION_MINUTES")) // 20
+func envWithDefault(varName string) int {
+	env, err := strconv.Atoi(os.Getenv(varName))
+	if err != nil || env == 0 {
+		return 1
+	}
+	return env
+}
+
+var JWT_SECRET = os.Getenv("JWT_SECRET")                                            // "VERYSTRONGSECRET"
+var ACCESS_TIME_DURATION_MINUTES = envWithDefault("ACCESS_TIME_DURATION_MINUTES")   // 5
+var REFRESH_TIME_DURATION_MINUTES = envWithDefault("REFRESH_TIME_DURATION_MINUTES") // 20
 
 // Describes User.
 type User struct {
@@ -82,6 +90,7 @@ func returnTokens(w http.ResponseWriter, email string) *Tokens {
 		return nil
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, string(json))
 
 	return &tokens

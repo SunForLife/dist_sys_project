@@ -10,6 +10,7 @@ RUN go mod download
 
 COPY . .
 RUN go install -v ./...
+RUN go test -v ./...
 
 # Export necessary port
 EXPOSE 9191
