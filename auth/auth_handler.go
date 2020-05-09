@@ -5,20 +5,22 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/jinzhu/gorm"
 )
 
 type AuthHandler struct {
-	Users []User
+	Db *gorm.DB
 }
 
 func (ah *AuthHandler) findUser(email string) (*User, error) {
-	for _, user := range ah.Users {
-		if email == user.Email {
-			return &user, nil
-		}
+	var user User
+	if err := ah.Db.Where("Email = ?", email).First(&user).Error; err != nil {
+		return nil, errors.New(fmt.Sprint("Not found user with email:", email))
 	}
-	return nil, errors.New("User doesn't exist.")
+	return &user, nil
 }
 
 func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +49,12 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	user.PassHash = md5Hash(user.Password)
 	user.Password = ""
 
-	ah.Users = append(ah.Users, user)
-
-	returnTokens(w, user.Email)
+	tokens := returnTokens(w, user.Email)
+	if tokens != nil {
+		user.Access = tokens.Access
+		user.Refresh = tokens.Refresh
+		ah.Db.Create(&user)
+	}
 }
 
 func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +82,13 @@ func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	returnTokens(w, user.Email)
+	tokens := returnTokens(w, user.Email)
+	if tokens != nil {
+		ah.Db.Delete(&dbUser, "Email = ?", dbUser.Email)
+		dbUser.Access = tokens.Access
+		dbUser.Refresh = tokens.Refresh
+		ah.Db.Create(&dbUser)
+	}
 }
 
 func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
@@ -89,10 +100,28 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	email, ok := validateToken(w, refresh, "refresh")
 	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	returnTokens(w, email)
+	user, err := ah.findUser(email)
+	if err != nil {
+		badRequest(w, "No user found in ah.Refresh.")
+		return
+	}
+	if user.Refresh != refresh {
+		log.Println("Got valid refresh token, but it has already been refreshed.")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	tokens := returnTokens(w, email)
+	if tokens != nil {
+		ah.Db.Delete(user, "Email = ?", email)
+		user.Access = tokens.Access
+		user.Refresh = tokens.Refresh
+		ah.Db.Create(user)
+	}
 }
 
 func (ah *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
@@ -102,8 +131,20 @@ func (ah *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, ok := validateToken(w, access, "access")
+	email, ok := validateToken(w, access, "access")
 	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := ah.findUser(email)
+	if err != nil {
+		badRequest(w, "No user found in ah.Validate.")
+		return
+	}
+
+	if user.Access != access {
+		log.Println("Got valid access token, but it has already been refreshed.")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

@@ -8,6 +8,13 @@ services:
       POSTGRES_USER: dany
       POSTGRES_PASSWORD: 123abc
 
+  db_auth:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: db_auth
+      POSTGRES_USER: dany
+      POSTGRES_PASSWORD: 123abc
+
   app:
     build: 
       context: ./app
@@ -29,7 +36,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9191:9191"
+    depends_on:
+      - "db_auth"
     environment:
       JWT_SECRET: "VERYSTRONGSECRET"
       ACCESS_TIME_DURATION_MINUTES: 5
       REFRESH_TIME_DURATION_MINUTES: 20
+      DB_HOST: db_auth
+      DB_PORT: 5432
+      DB_USER: dany
+      DB_NAME: db_auth
+      DB_PASSWORD: 123abc

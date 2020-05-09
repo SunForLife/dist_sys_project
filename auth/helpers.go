@@ -23,6 +23,8 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	PassHash string `json:"passhash"`
+	Access   string
+	Refresh  string
 }
 
 // Describes Tokens.
@@ -65,25 +67,27 @@ func issueTokens(email string) (string, string, error) {
 
 // Issues tokens from provided email
 // and returns them into provided ResponseWriter.
-func returnTokens(w http.ResponseWriter, email string) {
+func returnTokens(w http.ResponseWriter, email string) *Tokens {
 	var tokens Tokens
 	var err error
 	tokens.Access, tokens.Refresh, err = issueTokens(email)
 	if err != nil {
 		errorRequest(w, err)
-		return
+		return nil
 	}
 
 	json, err := json.Marshal(tokens)
 	if err != nil {
 		errorRequest(w, err)
-		return
+		return nil
 	}
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintln(w, string(json))
+
+	return &tokens
 }
 
-// Validates is provided token valid or not and returns token issued email.
+// Validates if provided token valid or not and returns token issued email.
 func validateToken(w http.ResponseWriter, stoken, tokenType string) (string, bool) {
 	token, err := jwt.Parse(stoken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
