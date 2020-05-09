@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -65,23 +66,20 @@ func (osh *OnlineShopHandler) handlerProductInfo(w http.ResponseWriter, r *http.
 func (osh *OnlineShopHandler) handlerNewProduct(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got create-new-product request")
 
-	if len(r.URL.Query()["name"]) == 0 {
-		badRequest(w, "name param not found")
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		badRequest(w, "error ioutil.ReadAll(r.Body)")
 		return
 	}
-	name := r.URL.Query()["name"][0]
-	if len(r.URL.Query()["code"]) == 0 {
-		badRequest(w, "code param not found")
-		return
-	}
-	code := r.URL.Query()["code"][0]
-	if len(r.URL.Query()["category"]) == 0 {
-		badRequest(w, "category param not found")
-		return
-	}
-	category := r.URL.Query()["category"][0]
 
-	osh.Db.Create(&Product{Name: name, Code: code, Category: category})
+	var product Product
+	err = json.Unmarshal(body, &product)
+	if err != nil {
+		badRequest(w, "error json.Unmarshal(body, &product)")
+		return
+	}
+
+	osh.Db.Create(&product)
 }
 
 // ChangeProductByName handler method of OnlineShopHandler.
@@ -93,30 +91,27 @@ func (osh *OnlineShopHandler) handlerChangeProductByName(w http.ResponseWriter, 
 		return
 	}
 	oldName := r.URL.Query()["old-name"][0]
-	if len(r.URL.Query()["name"]) == 0 {
-		badRequest(w, "name param not found")
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		badRequest(w, "error ioutil.ReadAll(r.Body)")
 		return
 	}
-	name := r.URL.Query()["name"][0]
-	if len(r.URL.Query()["code"]) == 0 {
-		badRequest(w, "code param not found")
-		return
-	}
-	code := r.URL.Query()["code"][0]
-	if len(r.URL.Query()["category"]) == 0 {
-		badRequest(w, "category param not found")
-		return
-	}
-	category := r.URL.Query()["category"][0]
 
 	var product Product
-	if err := osh.Db.Where("Name = ?", oldName).First(&product).Error; err != nil {
+	err = json.Unmarshal(body, &product)
+	if err != nil {
+		badRequest(w, "error json.Unmarshal(body, &product)")
+		return
+	}
+
+	if err := osh.Db.Where("Name = ?", oldName).First(&Product{}).Error; err != nil {
 		notFoundRequest(w, fmt.Sprint("Not found product with name:", oldName))
 		return
 	}
 
-	osh.Db.Delete(&product, "Name = ?", oldName)
-	osh.Db.Create(&Product{Name: name, Code: code, Category: category})
+	osh.Db.Delete(&Product{}, "Name = ?", oldName)
+	osh.Db.Create(&product)
 }
 
 // DeleteProduct handler method of OnlineShopHandler.
