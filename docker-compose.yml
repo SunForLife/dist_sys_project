@@ -30,8 +30,8 @@ services:
       DB_NAME: db
       DB_PASSWORD: 123abc
 
-  rabbitmq:
-    image: rabbitmq:management
+  # rabbitmq:
+  #   image: rabbitmq:management
 
   auth:
     build: 
@@ -42,7 +42,7 @@ services:
       - "9191:9191"
     depends_on:
       - "db_auth"
-      - "rabbitmq"
+      # - "rabbitmq"
     environment:
       JWT_SECRET: "VERYSTRONGSECRET"
       ACCESS_TIME_DURATION_MINUTES: 5
@@ -53,10 +53,10 @@ services:
       DB_NAME: db_auth
       DB_PASSWORD: 123abc
 
-  sms:
-    build: 
-      context: ./sms
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      - "rabbitmq"
+  # sms:
+  #   build: 
+  #     context: ./sms
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - "rabbitmq"

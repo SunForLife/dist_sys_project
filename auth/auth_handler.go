@@ -8,14 +8,12 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/streadway/amqp"
 )
 
-var authWaiters = make(map[string]*User)
-var authTimeouts = make(map[string]time.Time)
+// var authWaiters = make(map[string]*User)
+// var authTimeouts = make(map[string]time.Time)
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -29,8 +27,8 @@ func randSeq(n int) string {
 
 type AuthHandler struct {
 	Db *gorm.DB
-	Ch *amqp.Channel
-	Mq *amqp.Queue
+	// Ch *amqp.Channel
+	// Mq *amqp.Queue
 }
 
 func (ah *AuthHandler) findUser(email string) (*User, error) {
@@ -72,48 +70,48 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		user.Access = tokens.Access
 		user.Refresh = tokens.Refresh
 
-		authCode := randSeq(6)
-		sms := "localhost:9191/approve?code=" + authCode
-		err = ah.Ch.Publish(
-			"",         // exchange
-			ah.Mq.Name, // routing key
-			false,      // mandatory
-			false,      // immediate
-			amqp.Publishing{
-				ContentType: "text/plain",
-				Body:        []byte(sms),
-			})
-		if err != nil {
-			badRequest(w, fmt.Sprint("error sending sms:", err))
-			return
-		}
-		authWaiters[authCode] = &user
-		authTimeouts[authCode] = time.Now().Add(5 * time.Minute)
-		// ah.Db.Create(&user)
+		// authCode := randSeq(6)
+		// sms := "localhost:9191/approve?code=" + authCode
+		// err = ah.Ch.Publish(
+		// 	"",         // exchange
+		// 	ah.Mq.Name, // routing key
+		// 	false,      // mandatory
+		// 	false,      // immediate
+		// 	amqp.Publishing{
+		// 		ContentType: "text/plain",
+		// 		Body:        []byte(sms),
+		// 	})
+		// if err != nil {
+		// 	badRequest(w, fmt.Sprint("error sending sms:", err))
+		// 	return
+		// }
+		// authWaiters[authCode] = &user
+		// authTimeouts[authCode] = time.Now().Add(5 * time.Minute)
+		ah.Db.Create(&user)
 	}
 }
 
-func (ah *AuthHandler) Approve(w http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["code"]) == 0 {
-		badRequest(w, "code param not found")
-		return
-	}
-	authCode := r.URL.Query()["code"][0]
+// func (ah *AuthHandler) Approve(w http.ResponseWriter, r *http.Request) {
+// 	if len(r.URL.Query()["code"]) == 0 {
+// 		badRequest(w, "code param not found")
+// 		return
+// 	}
+// 	authCode := r.URL.Query()["code"][0]
 
-	if _, ok := authTimeouts[authCode]; !ok {
-		badRequest(w, "incorrect authCode")
-		return
-	}
+// 	if _, ok := authTimeouts[authCode]; !ok {
+// 		badRequest(w, "incorrect authCode")
+// 		return
+// 	}
 
-	if authTimeouts[authCode].After(time.Now()) {
-		ah.Db.Create(authWaiters[authCode])
-	} else {
-		badRequest(w, "timeout exceeded")
-		return
-	}
-	delete(authWaiters, authCode)
-	delete(authTimeouts, authCode)
-}
+// 	if authTimeouts[authCode].After(time.Now()) {
+// 		ah.Db.Create(authWaiters[authCode])
+// 	} else {
+// 		badRequest(w, "timeout exceeded")
+// 		return
+// 	}
+// 	delete(authWaiters, authCode)
+// 	delete(authTimeouts, authCode)
+// }
 
 func (ah *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
