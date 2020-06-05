@@ -22,9 +22,9 @@ type OnlineShopHandler struct {
 	Db *gorm.DB
 }
 
-// ProductList handler method of OnlineShopHandler.
-func (osh *OnlineShopHandler) handlerProductList(w http.ResponseWriter, r *http.Request) {
-	log.Println("Got get-product-list request")
+// Products handler method of OnlineShopHandler.
+func (osh *OnlineShopHandler) handlerProducts(w http.ResponseWriter, r *http.Request) {
+	log.Println("Got products request")
 
 	products := []Product{}
 	osh.Db.Find(&products)

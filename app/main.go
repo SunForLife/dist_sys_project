@@ -50,7 +50,7 @@ func main() {
 
 	mux := http.DefaultServeMux
 
-	http.HandleFunc("/product-list", onlineShopHandler.handlerProductList)
+	http.HandleFunc("/products", onlineShopHandler.handlerProducts)
 	http.HandleFunc("/product-info", onlineShopHandler.handlerProductInfo)
 	http.HandleFunc("/new-product", onlineShopHandler.handlerNewProduct)
 	http.HandleFunc("/change-product-by-name", onlineShopHandler.handlerChangeProductByName)
