@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 )
@@ -26,8 +27,29 @@ type OnlineShopHandler struct {
 func (osh *OnlineShopHandler) handlerProducts(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got products request")
 
+	if len(r.URL.Query()["position"]) == 0 {
+		badRequest(w, "position param not found")
+		return
+	}
+	position, err := strconv.Atoi(r.URL.Query()["position"][0])
+	if err != nil {
+		badRequest(w, "incorrect position param")
+		return
+	}
+
+	if len(r.URL.Query()["limit"]) == 0 {
+		badRequest(w, "limit param not found")
+		return
+	}
+	limit, err := strconv.Atoi(r.URL.Query()["limit"][0])
+	if err != nil {
+		badRequest(w, "incorrect limit param")
+		return
+	}
+
 	products := []Product{}
-	osh.Db.Find(&products)
+	osh.Db.Limit(position + limit).Find(&products)
+	products = products[position:]
 
 	json, err := json.Marshal(products)
 	if err != nil {
