@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
+	auth "lib/proto"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +14,15 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"google.golang.org/grpc"
 )
+
+type AuthClient struct {
+	conn   *grpc.ClientConn
+	client auth.AuthClient
+}
+
+var authClient *AuthClient
 
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,8 +32,13 @@ func middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if err := validateAccess(access); err != nil {
+		request := &auth.Request{Token: access}
+		resp, err := authClient.client.Validate(context.Background(), request)
+		if err != nil {
 			errorRequest(w, err)
+			return
+		} else if !resp.Authorized {
+			errorRequest(w, errors.New("error unauthorized"))
 			return
 		}
 
@@ -30,11 +46,25 @@ func middleware(next http.Handler) http.Handler {
 	})
 }
 
+func getRPCClient() (*AuthClient, error) {
+	conn, err := grpc.Dial("auth:6161", grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	authClient := &AuthClient{
+		conn:   conn,
+		client: auth.NewAuthClient(conn),
+	}
+
+	return authClient, nil
+}
+
 func main() {
 	port := flag.Int("port", 7171, "port")
 	flag.Parse()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	db, err := gorm.Open("postgres", fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"),
@@ -47,6 +77,12 @@ func main() {
 	db.AutoMigrate(&Product{})
 
 	onlineShopHandler := OnlineShopHandler{Db: db}
+
+	authClient, err = getRPCClient()
+	if err != nil {
+		log.Fatal("Failed to connect to RPC server", err)
+	}
+	defer authClient.conn.Close()
 
 	mux := http.DefaultServeMux
 

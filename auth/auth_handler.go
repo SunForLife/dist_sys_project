@@ -179,31 +179,3 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		ah.Db.Create(user)
 	}
 }
-
-func (ah *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
-	access := r.Header.Get("access")
-	if access == "" {
-		badRequest(w, "access param not found")
-		return
-	}
-
-	email, ok := validateToken(w, access, "access")
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	user, err := ah.findUser(email)
-	if err != nil {
-		badRequest(w, "No user found in ah.Validate.")
-		return
-	}
-
-	if user.Access != access {
-		log.Println("Got valid access token, but it has already been refreshed.")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}

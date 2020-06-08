@@ -3,19 +3,39 @@ package main
 import (
 	"flag"
 	"fmt"
+	auth "lib/proto"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"google.golang.org/grpc"
 )
+
+func startRPCServer(port string, authHandler *AuthHandler) {
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	auth.RegisterAuthServer(s, authHandler)
+
+	log.Printf("RPC serving on %s\n", port)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("RPC failed to serve: %v", err)
+	}
+}
 
 func main() {
 	port := flag.Int("port", 9191, "port")
 	flag.Parse()
 
+	time.Sleep(5 * time.Second)
 	// Postgres part.
 	db, err := gorm.Open("postgres", fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
@@ -52,11 +72,13 @@ func main() {
 		// Mq: &mq,
 	}
 
-	log.Printf("Auth started on port: %d\n", *port)
+	go startRPCServer(":6161", &authHandler)
+
 	http.HandleFunc("/sign-up", authHandler.SignUp)
 	// http.HandleFunc("/approve", authHandler.Approve)
 	http.HandleFunc("/sign-in", authHandler.SignIn)
 	http.HandleFunc("/refresh", authHandler.Refresh)
-	http.HandleFunc("/validate", authHandler.Validate)
+
+	log.Printf("Auth started on port: %d\n", *port)
 	log.Fatal(http.ListenAndServe("auth:"+strconv.Itoa(*port), nil))
 }

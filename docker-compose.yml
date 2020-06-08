@@ -17,8 +17,8 @@ services:
 
   app:
     build: 
-      context: ./app
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./app/Dockerfile
     ports:
       - "7171:7171"
     depends_on:
@@ -35,8 +35,8 @@ services:
 
   auth:
     build: 
-      context: ./auth
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./auth/Dockerfile
     restart: unless-stopped
     ports:
       - "9191:9191"

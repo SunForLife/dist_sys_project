@@ -4,11 +4,13 @@ ENV DOCKER_HOST=127.0.0.1:9191
 
 WORKDIR /go/src/auth
 
-COPY go.mod .
-COPY go.sum .
+COPY lib ../lib
+
+COPY auth/go.mod .
+COPY auth/go.sum .
 RUN go mod download
 
-COPY . .
+COPY auth/. .
 RUN go install -v ./...
 # RUN go test -v ./...
 
