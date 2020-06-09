@@ -74,6 +74,11 @@ func badRequest(w http.ResponseWriter, err string) {
 	writeErrorBody(w, err)
 }
 
+func errorRequest(w http.ResponseWriter, err error) {
+	w.WriteHeader(http.StatusInternalServerError)
+	writeErrorBody(w, err)
+}
+
 func writeErrorBody(w http.ResponseWriter, err interface{}) {
 	var sErr string
 	if err != nil {

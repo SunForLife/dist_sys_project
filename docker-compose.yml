@@ -55,8 +55,8 @@ services:
 
   upload:
     build: 
-      context: ./upload
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./upload/Dockerfile
     ports:
       - "8181:8181"
     depends_on:
