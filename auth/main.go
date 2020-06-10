@@ -79,6 +79,7 @@ func main() {
 	http.HandleFunc("/sign-in", authHandler.SignIn)
 	http.HandleFunc("/refresh", authHandler.Refresh)
 	http.HandleFunc("/check-user-role", authHandler.CheckUserRole)
+	http.HandleFunc("/change-role", authHandler.ChangeRole)
 
 	log.Printf("Auth started on port: %d\n", *port)
 	log.Fatal(http.ListenAndServe("auth:"+strconv.Itoa(*port), nil))

@@ -215,3 +215,45 @@ func (ah *AuthHandler) CheckUserRole(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (ah *AuthHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
+	access := r.Header.Get("access")
+	if access == "" {
+		badRequest(w, "access param not found.")
+		return
+	}
+
+	email, ok := validateToken(w, access, "access")
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := ah.findUser(email)
+	if err != nil {
+		badRequest(w, "No user found in ah.Refresh.")
+		return
+	}
+
+	if user.UserRole != "admin" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if len(r.URL.Query()["email"]) == 0 {
+		badRequest(w, "email param not found")
+		return
+	}
+	userEmail := r.URL.Query()["email"][0]
+
+	var userData User
+	if err := ah.Db.Where("Email = ?", userEmail).First(&userData).Error; err != nil {
+		notFoundRequest(w, fmt.Sprint("Not found product with email:", userEmail))
+		return
+	}
+	ah.Db.Delete(&User{}, "Email = ?", userEmail)
+	userData.UserRole = "admin"
+	ah.Db.Create(&userData)
+
+	w.WriteHeader(http.StatusOK)
+}
