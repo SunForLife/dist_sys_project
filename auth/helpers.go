@@ -33,6 +33,7 @@ type User struct {
 	PassHash string `json:"passhash"`
 	Access   string
 	Refresh  string
+	UserRole string
 }
 
 // Describes Tokens.

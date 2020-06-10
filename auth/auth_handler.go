@@ -65,6 +65,8 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	user.PassHash = md5Hash(user.Password)
 	user.Password = ""
 
+	user.UserRole = "user"
+
 	tokens := returnTokens(w, user.Email)
 	if tokens != nil {
 		user.Access = tokens.Access
@@ -87,6 +89,13 @@ func (ah *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		// }
 		// authWaiters[authCode] = &user
 		// authTimeouts[authCode] = time.Now().Add(5 * time.Minute)
+
+		var cnt int64
+		ah.Db.Table("users").Count(&cnt)
+		if cnt == 0 {
+			user.UserRole = "admin"
+		}
+
 		ah.Db.Create(&user)
 	}
 }
@@ -178,4 +187,31 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		user.Refresh = tokens.Refresh
 		ah.Db.Create(user)
 	}
+}
+
+func (ah *AuthHandler) CheckUserRole(w http.ResponseWriter, r *http.Request) {
+	access := r.Header.Get("access")
+	if access == "" {
+		badRequest(w, "access param not found.")
+		return
+	}
+
+	email, ok := validateToken(w, access, "access")
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := ah.findUser(email)
+	if err != nil {
+		badRequest(w, "No user found in ah.Refresh.")
+		return
+	}
+
+	if user.UserRole != "admin" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

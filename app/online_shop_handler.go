@@ -88,6 +88,12 @@ func (osh *OnlineShopHandler) handlerProductInfo(w http.ResponseWriter, r *http.
 func (osh *OnlineShopHandler) handlerNewProduct(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got create-new-product request")
 
+	err := checkUserRole(r)
+	if err != nil {
+		errorRequest(w, err)
+		return
+	}
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		badRequest(w, "error ioutil.ReadAll(r.Body)")
@@ -107,6 +113,12 @@ func (osh *OnlineShopHandler) handlerNewProduct(w http.ResponseWriter, r *http.R
 // ChangeProductByName handler method of OnlineShopHandler.
 func (osh *OnlineShopHandler) handlerChangeProductByName(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got change-product-by-name request")
+
+	err := checkUserRole(r)
+	if err != nil {
+		errorRequest(w, err)
+		return
+	}
 
 	if len(r.URL.Query()["old-name"]) == 0 {
 		badRequest(w, "old-name param not found")
@@ -139,6 +151,12 @@ func (osh *OnlineShopHandler) handlerChangeProductByName(w http.ResponseWriter, 
 // DeleteProduct handler method of OnlineShopHandler.
 func (osh *OnlineShopHandler) handlerDeleteProduct(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got delete-product request")
+
+	err := checkUserRole(r)
+	if err != nil {
+		errorRequest(w, err)
+		return
+	}
 
 	if len(r.URL.Query()["name"]) == 0 {
 		badRequest(w, "name param not found")

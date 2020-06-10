@@ -22,6 +22,12 @@ type UploadHandler struct {
 }
 
 func (uh *UploadHandler) Upload(w http.ResponseWriter, r *http.Request) {
+	err := checkUserRole(r)
+	if err != nil {
+		errorRequest(w, err)
+		return
+	}
+
 	reader, err := r.MultipartReader()
 	if err != nil {
 		badRequest(w, fmt.Sprint("Error r.MultipartReader():", err))
